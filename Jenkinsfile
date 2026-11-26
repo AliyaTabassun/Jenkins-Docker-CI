@@ -8,6 +8,7 @@ pipeline {
     }
 
     stages {
+
         stage('1. Checkout Code') {
             steps {
                 checkout scm
@@ -16,7 +17,7 @@ pipeline {
 
         stage('2. Application Build & Test') {
             steps {
-                bat 'C:\\Users\\VVCE\\AppData\\Local\\Programs\\Python\\Python311\\python.exe app.py'
+                bat '"C:\\Users\\STUDENT\\AppData\\Local\\Programs\\Python\\Python311\\python.exe" app.py'
             }
         }
 
@@ -37,7 +38,13 @@ pipeline {
 
     post {
         success {
-            echo "Pipeline succeeded! Image ${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER} is available locally and in the registry."
+            echo "Pipeline succeeded!"
+            echo "Image: ${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER}"
+            echo "Latest image: ${REGISTRY}/${IMAGE_NAME}:latest"
+        }
+
+        failure {
+            echo "Pipeline failed. Check Console Output for the error."
         }
     }
 }

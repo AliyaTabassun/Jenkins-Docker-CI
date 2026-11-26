@@ -1,16 +1,12 @@
-
 pipeline {
     agent any
 
     environment {
         REGISTRY = "localhost:5000"
         IMAGE_NAME = "abh-app"
-        DOCKER = "C:\\Users\\STUDENT\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker.exe"
-        PYTHON = "C:\\Users\\STUDENT\\AppData\\Local\\Programs\\Python\\Python311\\python.exe"
     }
 
     stages {
-
         stage('1. Checkout Code') {
             steps {
                 checkout scm
@@ -19,36 +15,30 @@ pipeline {
 
         stage('2. Application Build & Test') {
             steps {
-                bat '"%PYTHON%" app.py'
+                bat 'C:\\Users\\STUDENT\\AppData\\Local\\Programs\\Python\\Python313\\python.exe app.py'
             }
         }
 
-        stage('3. Build Docker Image') {
-            steps {
-                bat '"%DOCKER%" build -t %REGISTRY%/%IMAGE_NAME%:%BUILD_NUMBER% .'
-
-                bat '"%DOCKER%" tag %REGISTRY%/%IMAGE_NAME%:%BUILD_NUMBER% %REGISTRY%/%IMAGE_NAME%:latest'
-            }
-        }
-
-        stage('4. Push Docker Image') {
-            steps {
-                bat '"%DOCKER%" push %REGISTRY%/%IMAGE_NAME%:%BUILD_NUMBER%'
-
-                bat '"%DOCKER%" push %REGISTRY%/%IMAGE_NAME%:latest'
-            }
-        }
+        stage('3. Build & Tag Docker Image') {
+    steps {
+        bat '''
+            "C:\\Users\\STUDENT\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker.exe" build -t localhost:5000/abh-app:%BUILD_NUMBER% -t localhost:5000/abh-app:latest .
+        '''
+    }
+}
+stage('4. Push Image to Registry') {
+    steps {
+        bat '''
+            "C:\\Users\\STUDENT\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker.exe" push localhost:5000/abh-app:%BUILD_NUMBER%
+            "C:\\Users\\STUDENT\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker.exe" push localhost:5000/abh-app:latest
+        '''
+    }
+}
     }
 
     post {
         success {
-            echo "Pipeline succeeded!"
-            echo "Image: ${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER}"
-            echo "Latest image: ${REGISTRY}/${IMAGE_NAME}:latest"
-        }
-
-        failure {
-            echo "Pipeline failed. Check Console Output for the error."
+            echo "Pipeline succeeded! Image ${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER} is available locally and in the registry."
         }
     }
 }
